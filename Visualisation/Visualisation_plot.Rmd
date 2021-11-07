@@ -1,0 +1,344 @@
+---
+title: "Visualisation Elias Hermance"
+author: "Elias Hermance"
+date: "28/10/2021"
+output: html_document
+---
+
+#Initialisation
+
+Nous allons tout d'abord commencer par une phase d'initialisation, dans laquelle nous chargerons dans un premier temps les packages utilisés, puis nous importerons et agencerons les données **ispsos** pour les adapter à la futur représentation graphique.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+windowsFonts("Arial" = windowsFont("Arial"))
+library(gdata)
+library(Cairo)
+#ipsos<-read.table("ipsos.xlsx", encoding="latin1") #Ne fonctionne que si une version de perl est inclue
+library(readxl)
+library(ggplot2)
+ipsos <- read_excel("ipsos.xlsx") #On implémente le jeu de données
+sort.ipsos<-ipsos[order(ipsos$Percent) ,] #On réorganise le jeu de données en triant les valeurs par pourcentage dans l'ordre croissant
+attach(sort.ipsos) #On "détache" les noms des colonnes du jeu de données organisé pour pouvoir les appeler dans des fonctions sans avoir à mettre "sort.ipsos"
+
+```
+
+
+##Graphique étape par étape
+
+#Etape 1
+
+Maintenant que nous avons importé les données et que nous les avons agencées comme nous le souhaitions, nous allons les représenter graphiquement. Avant d'arriver à un graphique final, nous allons y aller étape par étape tout en commentant le code qui se rajoute.
+
+```{r barplot_step_1}
+
+# png_file<- "barcharts_simple_step_1.png" #Enregistrement d'une variable nom pour le pdf
+# png(bg="grey98", png_file,width=900,height=650) #Création du pdf avec le graphique qui sera obtenu
+par(omi=c(0.65,0.25,0.75,0.75),mai=c(0.3,2,0.35,0),mgp=c(3,3,0),
+    family="Arial", las=1) #Ajout de Marges
+
+x<-barplot(Percent,names.arg=F,horiz=T,border=NA,xlim=c(0,100),col="grey", cex.names=0.85,axes=F) #Création d'un barplot sans les axes
+
+
+#dev.off()
+```
+
+Ici on a créé un barplot basique, sans les axes, avec la fonction **barplot()**.
+
+```{r barplot_step_2}
+# png_file<- "barcharts_simple_step_2.png" #Enregistrement d'une variable nom pour le pdf
+# png(bg="grey98", pdf_file,width=900,height=650) #Création du pdf avec le graphique qui sera obtenu
+par(omi=c(0.65,0.25,0.75,0.75),mai=c(0.3,2,0.35,0),mgp=c(3,3,0),
+    family="Arial", las=1)  
+
+x<-barplot(Percent,names.arg=F,horiz=T,border=NA,xlim=c(0,100),col="grey", cex.names=0.85,axes=F) #Création d'un barplot sans les axes
+
+for (i in 1:length(Country)) #Boucle pour rajouter les individus statistiques
+{
+  if (Country[i] %in% c("Germany","Brazil")) 
+  {myFont<-"Arial Black"} else {myFont<-"Arial"}
+  text(-8,x[i],Country[i],xpd=T,adj=1,cex=0.85)#,family=myFont)
+  text(-3.5,x[i],Percent[i],xpd=T,adj=1,cex=0.85)#,family=myFont)
+}
+
+```
+
+On a rajouté une boucle au code qui nous a permis de rajouter les individus statistiques en légende, ainsi que la proportion.
+Ici grâce à la fonction **text()**. **myFont()** permet de changer la police.
+
+```{r barplot_step_3, message = FALSE}
+
+# png_file<- "barcharts_simple_step_3.png" #Enregistrement d'une variable nom pour le pdf
+# png(bg="grey98", pdf_file,width=900,height=650) #Création du pdf avec le graphique qui sera obtenu
+par(omi=c(0.65,0.25,0.75,0.75),mai=c(0.3,2,0.35,0),mgp=c(3,3,0),
+    family="Arial", las=1)
+
+x<-barplot(Percent,names.arg=F,horiz=T,border=NA,xlim=c(0,100),col="grey", cex.names=0.85,axes=F) #Création d'un barplot sans les axes
+for (i in 1:length(Country)) #Boucle pour rajouter les individus statistiques
+{
+  if (Country[i] %in% c("Germany","Brazil")) 
+  {myFont<-"Arial Black"} else {myFont<-"Arial"}
+  text(-8,x[i],Country[i],xpd=T,adj=1,cex=0.85)#,family=myFont)
+  text(-3.5,x[i],Percent[i],xpd=T,adj=1,cex=0.85)#,family=myFont)
+}
+
+rect(0,-0.5,20,28,col=rgb(191,239,255,80,maxColorValue=255),border=NA)
+rect(20,-0.5,40,28,col=rgb(191,239,255,120,maxColorValue=255),border=NA)
+rect(40,-0.5,60,28,col=rgb(191,239,255,80,maxColorValue=255),border=NA)
+rect(60,-0.5,80,28,col=rgb(191,239,255,120,maxColorValue=255),border=NA)
+rect(80,-0.5,100,28,col=rgb(191,239,255,80,maxColorValue=255),border=NA)
+#Ajout graphique pour répartir entre 5 classes les individus
+```
+
+Après avoir rajouté les individus statistiques, nous avons séparé graphiquement en 5 classes les différentes proportions grâce à la fonction **rect()**. Les classes sont les suivantes : 0-20%, 20-40%, 40-60%, 60-80% et 80-100%. Ces classes sont symbolisés par des rectangles de couleurs, couleurs différentes entre deux classes juxtaposées graphiquement.
+
+
+```{r barplot_step_4}
+
+# png_file<- "barcharts_simple_step_4.png" #Enregistrement d'une variable nom pour le pdf
+# png(bg="grey98", pdf_file,width=900,height=650) #Création du pdf avec le graphique qui sera obtenu
+par(omi=c(0.65,0.25,0.75,0.75),mai=c(0.3,2,0.35,0),mgp=c(3,3,0),
+    family="Arial", las=1)  
+
+x<-barplot(Percent,names.arg=F,horiz=T,border=NA,xlim=c(0,100),col="grey", cex.names=0.85,axes=F) #Création d'un barplot sans les axes
+for (i in 1:length(Country)) #Boucle pour rajouter les individus statistiques
+{
+  if (Country[i] %in% c("Germany","Brazil")) 
+  {myFont<-"Arial Black"} else {myFont<-"Arial"}
+  text(-8,x[i],Country[i],xpd=T,adj=1,cex=0.85)#,family=myFont)
+  text(-3.5,x[i],Percent[i],xpd=T,adj=1,cex=0.85)#,family=myFont)
+}
+rect(0,-0.5,20,28,col=rgb(191,239,255,80,maxColorValue=255),border=NA)
+rect(20,-0.5,40,28,col=rgb(191,239,255,120,maxColorValue=255),border=NA)
+rect(40,-0.5,60,28,col=rgb(191,239,255,80,maxColorValue=255),border=NA)
+rect(60,-0.5,80,28,col=rgb(191,239,255,120,maxColorValue=255),border=NA)
+rect(80,-0.5,100,28,col=rgb(191,239,255,80,maxColorValue=255),border=NA)
+#Ajout graphique pour répartir entre 5 classes les individus
+
+myValue2<-c(0,0,0,0,27,0,0,0,0,0,0,0,0,84,0,0) 
+myColour2<-rgb(255,0,210,maxColorValue=255)
+x2<-barplot(myValue2,names.arg=F,horiz=T,border=NA,xlim=c(0,100),col=myColour2,cex.names=0.85,axes=F,add=T) #Ajout d'une couleur pour faire ressortir deux valeurs
+
+
+```
+
+On ajoute un plot par dessus le précédent, en spécifiant uniquement deux valeurs pour ne pas empieter sur le plot précédent avec encore une fois la fonction **barplot()**. On s'est assuré auparavant d'avoir des valeurs égales à zéro pour ce second barplot pour éviter un empiètement des valeurs. Les deux valeurs ajoutées sont d'une couleur différentes pour pouvoir les faire ressortir. 
+
+```{r barplot_final}
+
+# png_file<- "barcharts_simple_final.png" #Enregistrement d'une variable nom pour le pdf
+# png(bg="grey98", pdf_file,width=900,height=650) #Création du pdf avec le graphique qui sera obtenu
+par(omi=c(0.65,0.25,0.75,0.75),mai=c(0.3,2,0.35,0),mgp=c(3,3,0),
+    family="Arial", las=1)  
+
+x<-barplot(Percent,names.arg=F,horiz=T,border=NA,xlim=c(0,100),col="grey", cex.names=0.85,axes=F) #Création d'un barplot sans les axes
+for (i in 1:length(Country)) #Boucle pour rajouter les individus statistiques
+{
+  if (Country[i] %in% c("Germany","Brazil")) 
+  {myFont<-"Arial Black"} else {myFont<-"Arial"}
+  text(-8,x[i],Country[i],xpd=T,adj=1,cex=0.85)#,family=myFont)
+  text(-3.5,x[i],Percent[i],xpd=T,adj=1,cex=0.85)#,family=myFont)
+}
+rect(0,-0.5,20,28,col=rgb(191,239,255,80,maxColorValue=255),border=NA)
+rect(20,-0.5,40,28,col=rgb(191,239,255,120,maxColorValue=255),border=NA)
+rect(40,-0.5,60,28,col=rgb(191,239,255,80,maxColorValue=255),border=NA)
+rect(60,-0.5,80,28,col=rgb(191,239,255,120,maxColorValue=255),border=NA)
+rect(80,-0.5,100,28,col=rgb(191,239,255,80,maxColorValue=255),border=NA)
+#Ajout graphique pour répartir entre 5 classes les individus
+myValue2<-c(0,0,0,0,27,0,0,0,0,0,0,0,0,84,0,0) 
+myColour2<-rgb(255,0,210,maxColorValue=255)
+x2<-barplot(myValue2,names.arg=F,horiz=T,border=NA,xlim=c(0,100),col=myColour2,cex.names=0.85,axes=F,add=T) #Ajout d'une couleur pour faire ressortir deux valeurs
+
+arrows(45,-0.5,45,20.5,lwd=1.5,length=0,xpd=T,col="skyblue3") 
+arrows(45,-0.5,45,-0.75,lwd=3,length=0,xpd=T)
+arrows(45,20.5,45,20.75,lwd=3,length=0,xpd=T)
+text(41,20.5,"Average",adj=1,xpd=T,cex=0.65,font=3)
+text(44,20.5,"45",adj=1,xpd=T,cex=0.65,font=4)#,family="Arial") #Ajout d'une ligne moyenne à 45%
+text(100,20.5,"All values in percent",adj=1,xpd=T,cex=0.65,font=3) #Axe des x
+mtext(c(0,20,40,60,80,100),at=c(0,20,40,60,80,100),1,line=0,cex=0.80) #Valeurs de l'axe des x
+mtext("'I Definitely Believe in God or a Supreme Being'",3,line=1.3,adj=0,cex=1.2,outer=T)#,family="Arial Black") #Titre du barplot
+mtext("was said in 2010 in:",3,line=-0.4,adj=0,cex=0.9,outer=T) #Sous titre
+mtext("Source: www.ipsos-na.com, Design: Stefan Fichtel, ixtract",1,line=1,adj=1.0,cex=0.65,outer=T,font=3) #Ajout d'un texte source
+
+```
+
+On a calculé la moyenne de toutes les proportions et on l'a affichée graphiquement grâce à la fonction **arrows()**, celle-ci se trouve à 45%. C'est la fonction **text()** qui permet de rajouter la légende de cette ligne. On a enfin ajouté des élements tel que le titre, le sous-titre du graphique et la source des données, grâce à la fonction **mtext()**.
+
+#Avec ggplot
+
+Maintenant nous allons présenter les mêmes étapes mais avec un graphique généré par **ggplot()**.
+
+```{r ggplot2_step_1}
+sort.ipsos <- within(ipsos, 
+                     Country <- reorder(Country, Percent)) #Organisation des pays dans l'ordre décroissant des pourcentages
+
+bold.country <- c("Germany", "Brazil") 
+bold.labels <- ifelse(Country %in% bold.country, yes = "bold", no = "plain")
+myValue2<-c(0,0,84,0,0,0,0,0,0,0,0,0,27,0,0,0) 
+myColour2<-rgb(255,0,210,maxColorValue=255)
+
+pl <- ggplot(sort.ipsos) + 
+  aes(x = Percent, y = Country) + 
+  xlim(c(-15,100)) + #définition des limites (axe des abscisses)
+  geom_bar(inherit.aes = T, stat = "identity", col = "grey")  +  #premier barplot
+  theme(panel.background = element_blank(), #On enlève le fond
+        axis.title = element_blank(), #On enlève le titre des axes
+        axis.ticks = element_blank(), #On enlève les graduations
+        axis.text = element_blank()) #On enlève le texte des axes
+```
+Pour créer un barplot, nous avions utilisé la fonction **barplot()**. Avec ggplot, nous devons tout d'abord préciser un "mapping" avec la fonction **aes()** pour pouvoir commencer un graphique. On doit ensuite indiquer que nous souhaitons faire un barplot avec la fonction **geom_bar()**. Pour retirer les axes, il faut préciser chaque élement à retirer, contrairement à **barplot()** où l'on pouvait tout retirer sur la même ligne.
+
+```{r ggplot2_step_2}
+
+sort.ipsos <- within(ipsos, 
+                     Country <- reorder(Country, Percent)) #Organisation des pays dans l'ordre décroissant des pourcentages
+
+bold.country <- c("Germany", "Brazil") 
+bold.labels <- ifelse(Country %in% bold.country, yes = "bold", no = "plain")
+myValue2<-c(0,0,84,0,0,0,0,0,0,0,0,0,27,0,0,0) 
+myColour2<-rgb(255,0,210,maxColorValue=255)
+
+pl <- ggplot(sort.ipsos) + 
+  aes(x = Percent, y = Country) + 
+  xlim(c(-15,100)) + #définition des limites (axe des abscisses)
+  geom_bar(inherit.aes = T, stat = "identity", col = "grey")  +  #premier barplot
+  theme(panel.background = element_blank(), #On enlève le fond
+        axis.title = element_blank(), #On enlève le titre des axes
+        axis.ticks = element_blank(), #On enlève les graduations
+        axis.text = element_blank()) + #On enlève le texte des axes
+  annotate("text", y = 1:16, x = -5, 
+           label = Country,
+           fontface = bold.labels,
+           hjust = 1) + #On a rajouté le nom des pays sur l'axe des ordonnées
+  annotate("text", y = 1:16, x = -1,
+           label = Percent,
+           fontface = bold.labels,
+           hjust = 1) #On a rajouté les pourcentages associés à chaque pays sur l'axe des ordonnées, à côté des pays
+
+pl #Affichage du ggplot
+```
+
+On a, comme précédemment, rajouté les noms des pays et leur proportion associée. Cet ajout se fait grâce à la fonction **annotate()** qui permet d'ajouter en plus du texte, d'autres formes comme on va le voir par la suite.
+
+```{r ggplot2_step_3}
+
+sort.ipsos <- within(ipsos, 
+                     Country <- reorder(Country, Percent)) #Organisation des pays dans l'ordre décroissant des pourcentages
+
+bold.country <- c("Germany", "Brazil") 
+bold.labels <- ifelse(Country %in% bold.country, yes = "bold", no = "plain")
+myValue2<-c(0,0,84,0,0,0,0,0,0,0,0,0,27,0,0,0) 
+myColour2<-rgb(255,0,210,maxColorValue=255)
+
+pl <- ggplot(sort.ipsos) + 
+  aes(x = Percent, y = Country) + 
+  xlim(c(-15,100)) + #définition des limites (axe des abscisses)
+  geom_bar(inherit.aes = T, stat = "identity", col = "grey")  +  #premier barplot
+  theme(panel.background = element_blank(), #On enlève le fond
+        axis.title = element_blank(), #On enlève le titre des axes
+        axis.ticks = element_blank(), #On enlève les graduations
+        axis.text = element_blank()) + #On enlève le texte des axes
+  annotate("text", y = 1:16, x = -5, 
+           label = Country,
+           fontface = bold.labels,
+           hjust = 1) + #On a rajouté le nom des pays sur l'axe des ordonnées
+  annotate("text", y = 1:16, x = -1,
+           label = Percent,
+           fontface = bold.labels,
+           hjust = 1) + #On a rajouté les pourcentages associés à chaque pays sur l'axe des ordonnées, à côté des pays
+  annotate("rect", xmin = c(0,20,40,60,80), xmax = c(20,40,60,80,100),
+           ymin = 0, ymax = 17, alpha = c(0.1,0.2,0.1,0.2,0.1),
+           fill = "#2596be") #On rajoute les rectangles de classes
+
+pl #Affichage du ggplot
+```
+
+L'ajout des rectangles de "classes" se fait ici par l'intermédiaire de la fonction **annotate()**, à nouveau. En effet, celle-ci est la fonction principale permettant d'ajouter des élements à un ggplot.
+
+```{r ggplot2_step_4}
+
+sort.ipsos <- within(ipsos, 
+                     Country <- reorder(Country, Percent)) #Organisation des pays dans l'ordre décroissant des pourcentages
+
+bold.country <- c("Germany", "Brazil") 
+bold.labels <- ifelse(Country %in% bold.country, yes = "bold", no = "plain")
+myValue2<-c(0,0,84,0,0,0,0,0,0,0,0,0,27,0,0,0) 
+myColour2<-rgb(255,0,210,maxColorValue=255)
+
+pl <- ggplot(sort.ipsos) + 
+  aes(x = Percent, y = Country) + 
+  xlim(c(-15,100)) + #définition des limites (axe des abscisses)
+  geom_bar(inherit.aes = T, stat = "identity", col = "grey")  +  #premier barplot
+  theme(panel.background = element_blank(), #On enlève le fond
+        axis.title = element_blank(), #On enlève le titre des axes
+        axis.ticks = element_blank(), #On enlève les graduations
+        axis.text = element_blank()) + #On enlève le texte des axes
+  annotate("text", y = 1:16, x = -5, 
+           label = Country,
+           fontface = bold.labels,
+           hjust = 1) + #On a rajouté le nom des pays sur l'axe des ordonnées
+  annotate("text", y = 1:16, x = -1,
+           label = Percent,
+           fontface = bold.labels,
+           hjust = 1) + #On a rajouté les pourcentages associés à chaque pays sur l'axe des ordonnées, à côté des pays
+  annotate("rect", xmin = c(0,20,40,60,80), xmax = c(20,40,60,80,100),
+           ymin = 0, ymax = 17, alpha = c(0.1,0.2,0.1,0.2,0.1),
+           fill = "#2596be") + #On rajoute les rectangles de classes
+  geom_bar(aes(x = myValue2, y = Country), stat = "identity", fill = myColour2) #Ajout des barres "roses" avec un deuxième barplot 
+
+pl #Affichage du ggplot
+```
+
+Tout comme pour **barplot()**, on doit ajouter un nouveau barplot avec la fonction **geom_bar()** pour pouvoir faire ressortir avec des couleurs les deux pays selectionnés.
+
+```{r ggplot2_final}
+
+sort.ipsos <- within(ipsos, 
+                     Country <- reorder(Country, Percent)) #Organisation des pays dans l'ordre décroissant des pourcentages
+bold.country <- c("Germany", "Brazil") 
+bold.labels <- ifelse(Country %in% bold.country, yes = "bold", no = "plain")
+myValue2<-c(0,0,84,0,0,0,0,0,0,0,0,0,27,0,0,0) 
+myColour2<-rgb(255,0,210,maxColorValue=255)
+
+pl <- ggplot(sort.ipsos) +
+  aes(x = Percent, y = Country) + 
+  xlim(c(-15,100)) + #définition des limites (axe des abscisses)
+  geom_bar(inherit.aes = T, stat = "identity", col = "grey")  +  #premier barplot
+  theme(panel.background = element_blank(), #On enlève le fond
+        axis.title = element_blank(), #On enlève le titre des axes
+        axis.ticks = element_blank(), #On enlève les graduations
+        axis.text = element_blank()) + #On enlève le texte des axes
+  annotate("text", y = 1:16, x = -5, 
+           label = Country,
+           fontface = bold.labels,
+           hjust = 1) + #On a rajouté le nom des pays sur l'axe des ordonnées
+  annotate("text", y = 1:16, x = -1,
+           label = Percent,
+           fontface = bold.labels,
+           hjust = 1) + #On a rajouté les pourcentages associés à chaque pays sur l'axe des ordonnées, à côté des pays
+  annotate("rect", xmin = c(0,20,40,60,80), xmax = c(20,40,60,80,100),
+           ymin = 0, ymax = 17, alpha = c(0.1,0.2,0.1,0.2,0.1),
+           fill = "#2596be") + #On rajoute les rectangles de classes
+  geom_bar(aes(x = myValue2, y = Country), stat = "identity", fill = myColour2) + #Ajout des barres "roses" avec un deuxième barplot 
+  geom_segment(aes(x = 45, y = -0.5, xend = 45, yend = 17.5), col = "skyblue3") + #Ajout de la barre des moyennes
+  geom_segment(aes(x = 45, y = -0.5, xend = 45, yend = -0.75), 
+               size = 2) +
+  geom_segment(aes(x = 45, y = 17.5, xend = 45, yend = 17.75),
+               size = 2) +
+  annotate("text", x = 41, y = 17.5, #Ajout du texte de la barre des moyennes
+           label = "Average", hjust = 1, fontface = 3, size = 3.5) +
+  annotate("text", x = 44, y = 17.5,
+           label = "45", hjust = 1, fontface = 4, size = 3) + #Ajout de la valeur de la moyenne
+  annotate ("text", x = 100, y = 17.5,
+            label = "All values in percent", hjust = 1, fontface = 3, size = 3) + #Ajout d'une légende 
+  annotate("text", x = c(0,20,40,60,80,100), y = -0.5, label = c(0,20,40,60,80,100),
+           size = 3.5) + 
+  annotate("text", x = c(-15,-15,47), y = c(20,18,-2),
+           label = c("'I Definitely Believe in God or a Supreme Being'","was said in 2010 in:","Source: www.ipsos-na.com, Design: Stefan Fichtel, ixtract"), hjust = c(0,0,0),vjust = c(1,0,0),
+           size = c(6,4.5,3)) #Ajout du titre, du sous-titre et de la source
+
+
+pl #Affichage du ggplot
+```
+
+La moyenne est affichée grâce à la fonction **annotate()**. Graphiquement, je pense qu'il est possible d'améliorer le rendu, qui est plus joli avec la version **barplot()**. On ajoute finalement le titre, le sous-titre et la source en une seule fois, encore une fois grâce à la fonction **annotate()**.
