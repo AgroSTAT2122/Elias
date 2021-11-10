@@ -1,0 +1,40 @@
+---
+title: "TD9"
+author: "Pierre Cottais"
+date: "18/10/2021"
+output: 
+  pdf_document: 
+    fig_caption: yes
+    number_sections: yes
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+ÉTUDE DE LA VARIABILITÉ DU TAUX D'HUMIDITÉ DANS LES CAFÉS MOULUS
+
+```{r echo=FALSE}
+df <- read.table("../data/torref.txt", sep = "\t", dec = ",", header = TRUE)
+df[,1:4] <- lapply(df[,1:4], as.factor)
+str(df)
+```
+
+
+1. Donner la nature de chacun des eﬀets (ﬁxes ou aléatoires) et le diagramme permettant de savoir comment construire le modèle (i.e. quels sont les eﬀets hiérarchisés, s’il y en a, et quels sont les eﬀets qui interagissent). Justiﬁer chacune de vos réponses.
+
+Natures des effets :
+
+* **Torrefacteur** ($B_j$) est **aléatoire** car il existe d'autres machines de torréfaction ;
+* **Type** ($\alpha_i$) est **fixe** car il n'y a que deux modes de torréfaction possible (lent ou rapide) ;
+* **Marque** ($C_k|j$) est subordonné au mode de torréfaction donc **aléatoire** ;
+* **Moment** ($D_l|j$) est subordonné au mode de torréfaction donc **aléatoire**.
+
+Équation du modèle initial :
+
+$Y_{ijklm} = \mu + \alpha_i + B_j + C_{k|j} + D_{l|j} + \alpha B_{ij} + \alpha C_{ik|j} + \alpha D_{il|j} + \alpha CD_{i(k|j)(l|j)} + \epsilon_{ijklm}$  
+
+Diagramme du modèle :
+
+![Diagramme en "patates"]("images/patates.png"){width=200}

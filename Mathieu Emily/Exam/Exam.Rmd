@@ -1,0 +1,134 @@
+---
+title: "Données expé"
+output: html_document
+---
+
+```{r setup, include=FALSE,echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("E:/Master 2/Mathieu Emily/Exam")
+```
+
+## Examen Données expérimentales
+
+Variable Réponse : **Y = Diamètre**
+
+#Facteurs de variabilités et leur nature 
+
+Lab = **aléatoire** ; Gene = **Fixe** ; Traitement = **Aléatoire**
+
+On met Lab et Traitement en aléatoire puisque les laboratoires ont été **tirés au sort**, et que les traitements **ne sont pas administrés** de la même manière entre les laboratoires. Il y a donc différentes manières d'administrer le traitement, indépendament du type de traitement. Les traitements sont donc **aléatoires**.
+
+Pour le facteur Gène, il n'existe que **deux possibilités** pour la présence d'un gène, oui ou non. Autrement dit, son absence ou sa présence. Le facteur Gène est donc **Fixe**
+
+#Hiérarchie
+
+Gène et Lab sont tous les deux **croisés**. Gène et Traitement sont **croisés** aussi.
+Cependant comme dans deux laboratoires le mode de traitement n'est pas le même, le traitement est subordé au Laboratoire. 
+Traitement est donc **subordonné** à Lab.
+
+#Natures des effets et des interactions
+
+* A : Gène **fixe**
+* B : Laboratoire **aléatoire**
+* C : Traitement **aléatoire**
+* AB : Gène:Laboratoire **aléatoire**
+* AC : Gène:(Traitement%in%Laboratoire) **aléatoire**
+
+Ici il y a plusieurs répétitions d'une même modalité, on peut donc conserver l'interaction d'ordre trois.
+
+#Équation du modèle initial
+
+$Y_{ijkl} = \mu + A_i + B_j + C_{k|j} + A B_{ij} + A C_{i(k|j)}+ \epsilon_{ijkl}$
+
+#Diagramme en "patates"
+
+("patates.jpg"){width=200}
+
+```{r setup}
+data <- read.table("DataGene.csv",header=TRUE,sep=";",stringsAsFactors = TRUE)
+data$Lab <- as.factor(data$Lab)
+
+get.pval <- function(sum.aov,i,j){
+  Fobs <- sum.aov[i,3]/sum.aov[j,3]
+  pval <- 1-pf(Fobs,df1=sum.aov[i,1],df2=sum.aov[j,1])
+  return(pval)
+}
+
+require("car")
+require(lmerTest)
+require(GAD)
+```
+
+
+On va donc partir du modèle complet pour ensuite descendre petit à petit en enlevant les effets non significatifs et en tirer le meilleur modèle.
+
+
+```{r Modèle, echo=TRUE}
+
+mod <- lm(Diameter ~ Gene + Lab + Treatment%in%Lab + Gene:Lab + Gene:(Treatment%in%Lab), data = data)
+mod0 <- lm(Diameter ~ 1, data)
+Anova(mod, type = "III")
+aov.mod <- aov(Diameter ~ Gene + Lab + Treatment + Gene:Lab + Gene:(Treatment%in%Lab), data = data)
+sum.aov.mod <- summary(aov.mod)
+#Le modèle complet est significativement différent du modèle nul. On va donc poursuivre avec le modèle complet.
+
+anova(mod) #L'interaction Gene:Lab n'est pas significative, mais elle est présente dans l'interaction d'ordre 3 Gene:Lab:Treatment qui est, elle, significative. On va donc garder le modèle tel qu'il est.
+
+```
+
+Pour pouvoir comparer les effets significatifs on ne va pas utiliser la méthode avec le package **GAD** comme le jeu de données n'est pas équilibré (il manque un "NotARN" dans le laboratoire 1 avec un gène présent)
+
+On va donc utiliser la méthode de Fisher pour pouvoir obtenir l'effet de chaque facteur.
+
+On constitue le tableau des carrés moyens : 
+
+$F_A = CMA\div CMAB$
+$F_B = CMB\div (CMC+CMAB-Residuelle)$
+$F_C = CMC\div (CMAC)$
+$F_AB = CMAB\div (CMAC)$
+$F_AC = CMAC\div Residuelle$
+
+#Question 1
+
+```{r Fisher, echo = TRUE}
+sum.aov.mod
+
+#Effet traitement
+get.pval(sum.aov.mod[[1]],3,j =5) #Pas significatif
+
+#Il n'y a donc pas d'effet traitement ici car il n'y a pas de différence significative avec la méthode de Fisher.
+
+```
+#Question 2
+
+```{r Fisher 2}
+
+sum.aov.mod
+#Effet Gene:Traitement, à savoir, est-ce que la présence du gène modifie l'effet du traitement.
+
+get.pval(sum.aov.mod[[1]],5,j =6) # significatif
+
+#La présence du gène modifie bien l'effet du traitement, d'après la méthode de Fisher.
+```
+#Question 3
+
+```{r Fisher 3}
+
+sum.aov.mod
+
+mod.anova <- (anova(mod))
+
+#Tout d'abord l'effet laboratoire en lui même :
+
+F.Laboratoire <- (mod.anova[[1]][3]/mod.anova[[2]][5])/(mod.anova[[1]][4]/mod.anova[[]][5])
+1-pf(F.Consommateur,mod.anova[[2]][3],mod.anova[[2]][7])
+
+get.pval(sum.aov.mod[[1]];2,j=)
+ 
+
+#Puis l'interaction de Laboratoire et Gène :
+
+get.pval(sum.aov.mod[[1]],4,j =5) #Pas significatif
+
+```
+
